@@ -1,257 +1,192 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { HandCoins, ShieldCheck, Timer, CreditCard } from "lucide-react";
+import { useState } from "react";
+import { ShieldCheck, Lock, ArrowRight, Search, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Negociar dívida - Devalor Cobranças" },
-      { name: "description", content: "Negocie sua dívida de forma rápida e segura com a Devalor Cobranças." },
+      { title: "Consultar débitos - Devalor Cobranças" },
+      {
+        name: "description",
+        content:
+          "Consulte seus débitos com CPF ou CNPJ e negocie de forma segura, 100% online, com a Devalor Cobranças.",
+      },
     ],
   }),
-  component: Index,
+  component: IdentificacaoPage,
 });
 
-const OFFER_DURATION = 10 * 60; // 10 minutos em segundos
-
-function useCountdown(duration: number) {
-  const [secondsLeft, setSecondsLeft] = useState(duration);
-  const [expired, setExpired] = useState(false);
-  const endRef = useRef<number>(Date.now() + duration * 1000);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const remaining = Math.max(0, Math.ceil((endRef.current - Date.now()) / 1000));
-      setSecondsLeft(remaining);
-      if (remaining === 0) setExpired(true);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
-  const ss = String(secondsLeft % 60).padStart(2, "0");
-  return { formatted: `${mm}:${ss}`, expired, secondsLeft };
+function maskCpfCnpj(raw: string) {
+  const digits = raw.replace(/\D/g, "").slice(0, 14);
+  if (digits.length <= 11) {
+    // CPF 000.000.000-00
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1-$2");
+  }
+  // CNPJ 00.000.000/0000-00
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
 }
 
-const propostas = [
-  {
-    id: "a-vista",
-    titulo: "Pagamento à vista",
-    valor: "R$ 1.250,00",
-    descricao: "75% de desconto",
-    tag: "Melhor oferta",
-    tagColor: "bg-green-100 text-green-800",
-  },
-  {
-    id: "12x",
-    titulo: "12 parcelas",
-    valor: "12x R$ 135,00",
-    descricao: "Total: R$ 1.620,00",
-    tag: "Flexível",
-    tagColor: "bg-blue-100 text-blue-800",
-  },
-  {
-    id: "24x",
-    titulo: "24 parcelas",
-    valor: "24x R$ 78,00",
-    descricao: "Total: R$ 1.872,00",
-    tag: "Mais leve",
-    tagColor: "bg-orange-100 text-orange-800",
-  },
-];
-
-function Index() {
+function IdentificacaoPage() {
   const navigate = useNavigate();
-  const { formatted, expired } = useCountdown(OFFER_DURATION);
-  const [aceito, setAceito] = useState(false);
-  const [selecionada, setSelecionada] = useState<string>("a-vista");
-  const [pagando, setPagando] = useState(false);
+  const [doc, setDoc] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
-  const handlePagar = () => {
-    if (!aceito || expired) return;
-    setPagando(true);
-    setTimeout(() => {
-      navigate({ to: "/sucesso" });
-    }, 800);
+  const digits = doc.replace(/\D/g, "");
+  const valido = digits.length === 11 || digits.length === 14;
+  const tipo = digits.length <= 11 ? "CPF" : "CNPJ";
+
+  const handleConsultar = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!valido) {
+      setErro("Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.");
+      return;
+    }
+    setErro(null);
+    setLoading(true);
+    setTimeout(() => navigate({ to: "/negociacao" }), 700);
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
+    <div className="min-h-screen relative overflow-hidden bg-background">
+      {/* Background gradient + blobs */}
+      <div
+        className="absolute inset-0 -z-10"
+        style={{ background: "var(--gradient-brand)" }}
+      />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-3xl -z-10 opacity-30"
+        style={{ background: "var(--brand-light)" }}
+      />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-3xl -z-10 opacity-20"
+        style={{ background: "var(--brand-light)" }}
+      />
+
       {/* Header */}
-      <header className="bg-white border-b border-neutral-100 px-4 py-4">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <h1 className="text-sm font-bold tracking-tight text-neutral-900 uppercase">
-            Devalor Cobranças
-          </h1>
-          <span className="text-xs font-medium text-neutral-400">Negociação</span>
+      <header className="relative z-10 px-6 py-6">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+              <span className="text-white font-display font-bold text-sm">D</span>
+            </div>
+            <div className="text-white">
+              <p className="font-display font-bold text-sm tracking-tight leading-none">DEVALOR</p>
+              <p className="text-[10px] text-white/60 uppercase tracking-widest leading-none mt-1">Cobranças</p>
+            </div>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 text-white/70 text-xs">
+            <Lock className="w-3.5 h-3.5" />
+            Ambiente seguro
+          </div>
         </div>
       </header>
 
-      {/* Contador flutuante */}
-      <div className="bg-red-600 text-white">
-        <div className="max-w-md mx-auto px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-medium">
-            <Timer className="w-3.5 h-3.5" />
-            <span>Oferta exclusiva:</span>
-          </div>
-          <div className={`text-sm font-mono font-bold tabular-nums ${expired ? "opacity-50" : ""}`}>
-            {expired ? "00:00" : formatted}
-          </div>
-        </div>
-      </div>
-
-      <main className="flex-1 max-w-md mx-auto w-full px-4 py-6 space-y-6">
-        {/* Resumo da dívida */}
-        <section className="bg-white rounded-xl border border-neutral-100 p-5 space-y-4">
-          <div className="space-y-1">
-            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide">Devedor</p>
-            <p className="text-sm font-semibold text-neutral-900">João da Silva</p>
-            <p className="text-xs text-neutral-500">CPF: ***.***,789-00</p>
-          </div>
-
-          <div className="h-px bg-neutral-100" />
-
-          <div className="space-y-1">
-            <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide">Credor</p>
-            <p className="text-sm font-medium text-neutral-800">Banco Financeira S.A.</p>
-          </div>
-
-          <div className="h-px bg-neutral-100" />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-neutral-400">Valor original</p>
-              <p className="text-sm font-semibold text-neutral-500 line-through">R$ 5.000,00</p>
+      <main className="relative z-10 px-6 pb-16">
+        <div className="max-w-md mx-auto pt-8 sm:pt-12">
+          {/* Hero text */}
+          <div className="text-center mb-8 space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-[11px] font-medium">
+              <Sparkles className="w-3 h-3" />
+              Negociação 100% digital
             </div>
-            <div className="text-right">
-              <p className="text-xs text-neutral-400">Valor atualizado</p>
-              <p className="text-lg font-bold text-neutral-900">R$ 5.000,00</p>
-            </div>
+            <h1 className="text-3xl sm:text-4xl font-display font-bold text-white leading-tight tracking-tight">
+              Quite sua dívida<br />
+              <span className="text-white/70">com até 80% de desconto</span>
+            </h1>
+            <p className="text-white/70 text-sm leading-relaxed max-w-sm mx-auto">
+              Informe seu CPF ou CNPJ para consultar débitos e ver propostas exclusivas.
+            </p>
           </div>
-        </section>
 
-        {/* Propostas */}
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-neutral-800">Escolha sua proposta</h2>
-
-          {propostas.map((p) => {
-            const ativa = selecionada === p.id && !expired;
-            const desativada = expired;
-            return (
-              <button
-                key={p.id}
-                onClick={() => !desativada && setSelecionada(p.id)}
-                className={`w-full text-left rounded-xl border p-4 transition-all duration-200 ${
-                  ativa
-                    ? "border-green-600 bg-green-50/50 ring-1 ring-green-600"
-                    : desativada
-                    ? "border-neutral-200 bg-neutral-50 opacity-50 cursor-not-allowed"
-                    : "border-neutral-200 bg-white hover:border-neutral-300"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-neutral-900">{p.titulo}</span>
-                      {!desativada && (
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${p.tagColor}`}>
-                          {p.tag}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-lg font-bold text-neutral-900">{p.valor}</p>
-                    <p className="text-xs text-neutral-500">{p.descricao}</p>
-                  </div>
-                  <div
-                    className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      ativa
-                        ? "border-green-600 bg-green-600"
-                        : "border-neutral-300"
-                    }`}
-                  >
-                    {ativa && <div className="w-2 h-2 rounded-full bg-white" />}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-
-          {expired && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
-              <p className="text-sm font-medium text-amber-800">
-                Esta oferta expirou.
-              </p>
-              <p className="text-xs text-amber-700 mt-1">
-                Recarregue a página para consultar as condições atualizadas.
-              </p>
+          {/* Card */}
+          <form
+            onSubmit={handleConsultar}
+            className="bg-white rounded-2xl p-6 sm:p-7 space-y-5"
+            style={{ boxShadow: "var(--shadow-elegant)" }}
+          >
+            <div className="space-y-2">
+              <label htmlFor="doc" className="text-xs font-semibold text-foreground uppercase tracking-wide">
+                CPF ou CNPJ
+              </label>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  id="doc"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="000.000.000-00"
+                  value={doc}
+                  onChange={(e) => {
+                    setDoc(maskCpfCnpj(e.target.value));
+                    if (erro) setErro(null);
+                  }}
+                  className="w-full h-14 pl-11 pr-20 rounded-xl border-2 border-border bg-secondary/40 text-foreground text-base font-medium tabular-nums tracking-wide focus:outline-none focus:border-accent focus:bg-white transition-all"
+                />
+                {digits.length > 0 && (
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-accent bg-accent/10 px-2 py-1 rounded-md uppercase">
+                    {tipo}
+                  </span>
+                )}
+              </div>
+              {erro && (
+                <p className="text-xs text-destructive font-medium">{erro}</p>
+              )}
             </div>
-          )}
-        </section>
 
-        {/* Termos */}
-        {!expired && (
-          <section className="flex items-start gap-3">
             <button
-              onClick={() => setAceito((v) => !v)}
-              className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                aceito
-                  ? "border-green-600 bg-green-600"
-                  : "border-neutral-300 bg-white"
-              }`}
+              type="submit"
+              disabled={!valido || loading}
+              className="w-full h-14 rounded-xl text-primary-foreground font-display font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ background: valido && !loading ? "var(--gradient-brand)" : "var(--brand-deep)" }}
             >
-              {aceito && (
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Consultando...
+                </>
+              ) : (
+                <>
+                  Consultar débitos
+                  <ArrowRight className="w-4 h-4" />
+                </>
               )}
             </button>
-            <p className="text-xs text-neutral-500 leading-relaxed">
-              Li e concordo com os{" "}
-              <a href="#" className="underline text-neutral-700 hover:text-neutral-900">
-                termos do acordo
-              </a>{" "}
-              e autorizo a formalização desta negociação.
-            </p>
-          </section>
-        )}
 
-        {/* Botão */}
-        {!expired && (
-          <button
-            onClick={handlePagar}
-            disabled={!aceito || pagando}
-            className={`w-full flex items-center justify-center gap-2 rounded-xl py-4 text-sm font-semibold transition-all ${
-              aceito && !pagando
-                ? "bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]"
-                : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
-            }`}
-          >
-            {pagando ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Gerando pagamento...
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-4 h-4" />
-                Gerar pagamento
-              </>
-            )}
-          </button>
-        )}
+            <div className="flex items-center gap-2 pt-1 border-t border-border">
+              <ShieldCheck className="w-4 h-4 text-success shrink-0 mt-2" />
+              <p className="text-[11px] text-muted-foreground leading-relaxed pt-2">
+                Seus dados são criptografados e tratados conforme a LGPD.
+                A Devalor não compartilha suas informações.
+              </p>
+            </div>
+          </form>
 
-        {/* Segurança */}
-        <div className="flex items-center justify-center gap-4 text-xs text-neutral-400 pt-2">
-          <span className="flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            SSL seguro
-          </span>
-          <span className="flex items-center gap-1">
-            <HandCoins className="w-3.5 h-3.5" />
-            Asaas
-          </span>
+          {/* Trust badges */}
+          <div className="mt-8 grid grid-cols-3 gap-3 text-center">
+            {[
+              { label: "+150 mil", sub: "acordos firmados" },
+              { label: "98%", sub: "satisfação" },
+              { label: "24/7", sub: "disponível" },
+            ].map((b) => (
+              <div key={b.label} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl py-3">
+                <p className="font-display font-bold text-white text-base leading-none">{b.label}</p>
+                <p className="text-[10px] text-white/60 mt-1 uppercase tracking-wider">{b.sub}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
+
+      <footer className="relative z-10 text-center pb-6 text-white/40 text-[11px]">
+        © {new Date().getFullYear()} Devalor Cobranças · Todos os direitos reservados
+      </footer>
     </div>
   );
 }
