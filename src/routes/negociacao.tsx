@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { HandCoins, ShieldCheck, Timer, CreditCard } from "lucide-react";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/negociacao")({
   head: () => ({
     meta: [
       { title: "Negociar dívida - Devalor Cobranças" },

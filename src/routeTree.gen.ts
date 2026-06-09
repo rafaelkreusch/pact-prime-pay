@@ -10,42 +10,42 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SucessoRouteImport } from './routes/sucesso'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as NegociacaoRouteImport } from './routes/negociacao'
 
 const SucessoRoute = SucessoRouteImport.update({
   id: '/sucesso',
   path: '/sucesso',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const NegociacaoRoute = NegociacaoRouteImport.update({
+  id: '/negociacao',
+  path: '/negociacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/negociacao': typeof NegociacaoRoute
   '/sucesso': typeof SucessoRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/negociacao': typeof NegociacaoRoute
   '/sucesso': typeof SucessoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/negociacao': typeof NegociacaoRoute
   '/sucesso': typeof SucessoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sucesso'
+  fullPaths: '/negociacao' | '/sucesso'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sucesso'
-  id: '__root__' | '/' | '/sucesso'
+  to: '/negociacao' | '/sucesso'
+  id: '__root__' | '/negociacao' | '/sucesso'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  NegociacaoRoute: typeof NegociacaoRoute
   SucessoRoute: typeof SucessoRoute
 }
 
@@ -58,20 +58,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SucessoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/negociacao': {
+      id: '/negociacao'
+      path: '/negociacao'
+      fullPath: '/negociacao'
+      preLoaderRoute: typeof NegociacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  NegociacaoRoute: NegociacaoRoute,
   SucessoRoute: SucessoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
