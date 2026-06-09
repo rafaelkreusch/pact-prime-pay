@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SucessoRouteImport } from './routes/sucesso'
 import { Route as NegociacaoRouteImport } from './routes/negociacao'
+import { Route as IndexRouteImport } from './routes/index'
 
 const SucessoRoute = SucessoRouteImport.update({
   id: '/sucesso',
@@ -22,29 +23,38 @@ const NegociacaoRoute = NegociacaoRouteImport.update({
   path: '/negociacao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/negociacao': typeof NegociacaoRoute
   '/sucesso': typeof SucessoRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/negociacao': typeof NegociacaoRoute
   '/sucesso': typeof SucessoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/negociacao': typeof NegociacaoRoute
   '/sucesso': typeof SucessoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/negociacao' | '/sucesso'
+  fullPaths: '/' | '/negociacao' | '/sucesso'
   fileRoutesByTo: FileRoutesByTo
-  to: '/negociacao' | '/sucesso'
-  id: '__root__' | '/negociacao' | '/sucesso'
+  to: '/' | '/negociacao' | '/sucesso'
+  id: '__root__' | '/' | '/negociacao' | '/sucesso'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   NegociacaoRoute: typeof NegociacaoRoute
   SucessoRoute: typeof SucessoRoute
 }
@@ -65,10 +75,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NegociacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   NegociacaoRoute: NegociacaoRoute,
   SucessoRoute: SucessoRoute,
 }
