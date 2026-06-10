@@ -64,6 +64,7 @@
   --color-brand-deep: var(--brand-deep);
   --color-brand-mid: var(--brand-mid);
   --color-brand-light: var(--brand-light);
+  --color-brand-gold: var(--brand-gold);
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
 }
