@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ShieldCheck, Lock, ArrowRight, Search, Sparkles } from "lucide-react";
+import { ShieldCheck, Lock, ArrowRight, Search, CheckCircle2, Clock, BadgePercent } from "lucide-react";
+import logoAsset from "@/assets/devalor-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -55,61 +56,77 @@ function IdentificacaoPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Background gradient + blobs */}
-      <div
-        className="absolute inset-0 -z-10"
-        style={{ background: "var(--gradient-brand)" }}
-      />
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-3xl -z-10 opacity-30"
-        style={{ background: "var(--brand-light)" }}
-      />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-3xl -z-10 opacity-20"
-        style={{ background: "var(--brand-light)" }}
+    <div className="min-h-screen relative overflow-hidden text-white" style={{ background: "var(--gradient-brand)" }}>
+      {/* Spotlights */}
+      <div className="absolute inset-0 -z-0 pointer-events-none" style={{ background: "var(--gradient-spot)" }} />
+      {/* Grain / noise overlay using SVG */}
+      <div className="absolute inset-0 -z-0 opacity-[0.07] mix-blend-overlay pointer-events-none"
+        style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }}
       />
 
       {/* Header */}
-      <header className="relative z-10 px-6 py-6">
+      <header className="relative z-10 px-5 sm:px-8 py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-              <span className="text-white font-display font-bold text-sm">D</span>
-            </div>
-            <div className="text-white">
-              <p className="font-display font-bold text-sm tracking-tight leading-none">DEVALOR</p>
-              <p className="text-[10px] text-white/60 uppercase tracking-widest leading-none mt-1">Cobranças</p>
-            </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 text-white/70 text-xs">
+          <img src={logoAsset.url} alt="Devalor — Soluções diferenciadas" className="h-12 sm:h-14 w-auto drop-shadow-lg" />
+          <div className="hidden sm:flex items-center gap-2 text-white/75 text-xs px-3 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm">
             <Lock className="w-3.5 h-3.5" />
-            Ambiente seguro
+            Ambiente 100% seguro
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 px-6 pb-16">
-        <div className="max-w-md mx-auto pt-8 sm:pt-12">
+      <main className="relative z-10 px-5 sm:px-8 pb-14">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-16 items-center pt-6 lg:pt-12">
           {/* Hero text */}
-          <div className="text-center mb-8 space-y-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-[11px] font-medium">
-              <Sparkles className="w-3 h-3" />
-              Negociação 100% digital
+          <div className="space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-[11px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "var(--brand-gold)" }}
+            >
+              <BadgePercent className="w-3.5 h-3.5" />
+              Descontos exclusivos por tempo limitado
             </div>
-            <h1 className="text-3xl sm:text-4xl font-display font-bold text-white leading-tight tracking-tight">
-              Quite sua dívida<br />
-              <span className="text-white/70">com até 80% de desconto</span>
+            <h1 className="font-display font-bold leading-[1.05] tracking-tight text-[2.4rem] sm:text-5xl lg:text-[3.5rem]">
+              Regularize sua pendência<br />
+              <span style={{ color: "var(--brand-gold)" }}>e recupere sua tranquilidade financeira.</span>
             </h1>
-            <p className="text-white/70 text-sm leading-relaxed max-w-sm mx-auto">
-              Informe seu CPF ou CNPJ para consultar débitos e ver propostas exclusivas.
+            <p className="text-white/80 text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
+              Informe seu CPF ou CNPJ e descubra, em segundos, propostas personalizadas
+              com até <strong className="text-white">80% de desconto</strong>. Sem fila, sem ligação, sem burocracia.
             </p>
+
+            <ul className="grid sm:grid-cols-3 gap-3 pt-2 max-w-xl mx-auto lg:mx-0">
+              {[
+                { icon: CheckCircle2, label: "Acordo 100% online" },
+                { icon: Clock, label: "Aprovação imediata" },
+                { icon: ShieldCheck, label: "Pagamento seguro" },
+              ].map(({ icon: Icon, label }) => (
+                <li key={label} className="flex items-center gap-2 text-sm text-white/85">
+                  <Icon className="w-4 h-4 shrink-0" style={{ color: "var(--brand-gold)" }} />
+                  {label}
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Card */}
           <form
             onSubmit={handleConsultar}
-            className="bg-white rounded-2xl p-6 sm:p-7 space-y-5"
+            className="bg-white rounded-3xl p-6 sm:p-8 space-y-5 relative"
             style={{ boxShadow: "var(--shadow-elegant)" }}
           >
+            <div className="absolute -top-3 left-6 right-6 h-3 rounded-t-3xl opacity-60 blur-md" style={{ background: "var(--brand-gold)" }} />
+            <div className="space-y-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--brand-deep)" }}>
+                Comece agora
+              </p>
+              <h2 className="font-display text-2xl font-bold text-foreground leading-tight">
+                Consulte seus débitos
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Leva menos de 30 segundos.
+              </p>
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="doc" className="text-xs font-semibold text-foreground uppercase tracking-wide">
                 CPF ou CNPJ
@@ -127,10 +144,12 @@ function IdentificacaoPage() {
                     setDoc(maskCpfCnpj(e.target.value));
                     if (erro) setErro(null);
                   }}
-                  className="w-full h-14 pl-11 pr-20 rounded-xl border-2 border-border bg-secondary/40 text-foreground text-base font-medium tabular-nums tracking-wide focus:outline-none focus:border-accent focus:bg-white transition-all"
+                  className="w-full h-14 pl-11 pr-20 rounded-xl border-2 border-border bg-secondary/40 text-foreground text-base font-medium tabular-nums tracking-wide focus:outline-none focus:border-ring focus:bg-white transition-all"
                 />
                 {digits.length > 0 && (
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-accent bg-accent/10 px-2 py-1 rounded-md uppercase">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold px-2 py-1 rounded-md uppercase"
+                    style={{ color: "var(--brand-deep)", background: "color-mix(in oklab, var(--brand-deep) 10%, transparent)" }}
+                  >
                     {tipo}
                   </span>
                 )}
@@ -143,8 +162,8 @@ function IdentificacaoPage() {
             <button
               type="submit"
               disabled={!valido || loading}
-              className="w-full h-14 rounded-xl text-primary-foreground font-display font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: valido && !loading ? "var(--gradient-brand)" : "var(--brand-deep)" }}
+              className="w-full h-14 rounded-xl text-white font-display font-semibold text-sm uppercase tracking-[0.12em] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
+              style={{ background: "var(--gradient-brand)", boxShadow: "0 10px 30px -10px color-mix(in oklab, var(--brand-deep) 60%, transparent)" }}
             >
               {loading ? (
                 <>
@@ -167,24 +186,24 @@ function IdentificacaoPage() {
               </p>
             </div>
           </form>
+        </div>
 
-          {/* Trust badges */}
-          <div className="mt-8 grid grid-cols-3 gap-3 text-center">
-            {[
-              { label: "+150 mil", sub: "acordos firmados" },
-              { label: "98%", sub: "satisfação" },
-              { label: "24/7", sub: "disponível" },
-            ].map((b) => (
-              <div key={b.label} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl py-3">
-                <p className="font-display font-bold text-white text-base leading-none">{b.label}</p>
-                <p className="text-[10px] text-white/60 mt-1 uppercase tracking-wider">{b.sub}</p>
-              </div>
-            ))}
-          </div>
+        {/* Trust badges */}
+        <div className="max-w-4xl mx-auto mt-12 grid grid-cols-3 gap-3 sm:gap-4 text-center">
+          {[
+            { label: "+150 mil", sub: "acordos firmados" },
+            { label: "98%", sub: "satisfação" },
+            { label: "24/7", sub: "disponível" },
+          ].map((b) => (
+            <div key={b.label} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl py-4 px-2">
+              <p className="font-display font-bold text-white text-xl sm:text-2xl leading-none">{b.label}</p>
+              <p className="text-[10px] sm:text-xs text-white/60 mt-1.5 uppercase tracking-wider">{b.sub}</p>
+            </div>
+          ))}
         </div>
       </main>
 
-      <footer className="relative z-10 text-center pb-6 text-white/40 text-[11px]">
+      <footer className="relative z-10 text-center pb-6 text-white/45 text-[11px]">
         © {new Date().getFullYear()} Devalor Cobranças · Todos os direitos reservados
       </footer>
     </div>
