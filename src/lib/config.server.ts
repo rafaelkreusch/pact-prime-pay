@@ -1,26 +1,76 @@
 import process from "node:process";
 
-// Server-only config. The .server.ts suffix prevents Vite from bundling
-// this file into the client — values here never reach the browser.
-//
-// On Cloudflare Workers, env binds at REQUEST time. Module-scope reads
-// (e.g. `const x = process.env.X`) resolve to undefined — always read
-// process.env INSIDE a function or handler.
-//
-// When to use which env-access pattern:
-//   - .server.ts module (this file): server-only helpers reused across
-//     handlers. Wrap reads in a function so they run per-request.
-//   - inline process.env inside a createServerFn handler: one-off reads
-//     not reused elsewhere.
-//   - import.meta.env.VITE_FOO: PUBLIC config readable from both client
-//     and server (analytics IDs, public URLs). Define in .env with the
-//     VITE_ prefix. Never put secrets here — they ship to the browser.
+type AppConfig = {
+  nodeEnv: string;
+  appUrl: string;
+  paymentDueDays: number;
+  supabase: {
+    url: string;
+    serviceRoleKey: string;
+    negotiationsTable: string;
+    agreementsTable: string;
+    logsTable: string;
+    debtorNameColumn: string;
+    documentColumn: string;
+    creditorColumn: string;
+    upfrontColumn: string;
+    installment2xColumn: string;
+    installment3xColumn: string;
+    installment4xColumn: string;
+  };
+  asaas: {
+    apiKey: string;
+    baseUrl: string;
+  };
+};
 
-export function getServerConfig() {
+function getRequiredEnv(name: string) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return value;
+}
+
+function getOptionalEnv(name: string, fallback: string) {
+  return process.env[name] ?? fallback;
+}
+
+function getPositiveIntegerEnv(name: string, fallback: number) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(`Environment variable ${name} must be a positive integer.`);
+  }
+
+  return parsed;
+}
+
+export function getServerConfig(): AppConfig {
   return {
-    nodeEnv: process.env.NODE_ENV,
-    // Add server-only values here, e.g.:
-    //   databaseUrl: process.env.DATABASE_URL,
-    //   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    nodeEnv: process.env.NODE_ENV ?? "development",
+    appUrl: getRequiredEnv("APP_URL"),
+    paymentDueDays: getPositiveIntegerEnv("PAYMENT_DUE_DAYS", 3),
+    supabase: {
+      url: getRequiredEnv("SUPABASE_URL"),
+      serviceRoleKey: getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
+      negotiationsTable: getOptionalEnv("SUPABASE_NEGOTIATIONS_TABLE", "negociacoes"),
+      agreementsTable: getOptionalEnv("SUPABASE_AGREEMENTS_TABLE", "acordos"),
+      logsTable: getOptionalEnv("SUPABASE_LOGS_TABLE", "logs_integracao"),
+      debtorNameColumn: getOptionalEnv("SUPABASE_DEBTOR_NAME_COLUMN", "devedor"),
+      documentColumn: getOptionalEnv("SUPABASE_DOCUMENT_COLUMN", "cnpj"),
+      creditorColumn: getOptionalEnv("SUPABASE_CREDITOR_COLUMN", "credor"),
+      upfrontColumn: getOptionalEnv("SUPABASE_UPFRONT_COLUMN", "valor_avista"),
+      installment2xColumn: getOptionalEnv("SUPABASE_INSTALLMENT_2X_COLUMN", "parcela_2x"),
+      installment3xColumn: getOptionalEnv("SUPABASE_INSTALLMENT_3X_COLUMN", "parcela_3x"),
+      installment4xColumn: getOptionalEnv("SUPABASE_INSTALLMENT_4X_COLUMN", "parcela_4x"),
+    },
+    asaas: {
+      apiKey: getRequiredEnv("ASAAS_API_KEY"),
+      baseUrl: getOptionalEnv("ASAAS_BASE_URL", "https://api-sandbox.asaas.com/v3"),
+    },
   };
 }
