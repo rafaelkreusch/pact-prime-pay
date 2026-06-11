@@ -1,4 +1,4 @@
-import { getServerConfig } from "../config.server";
+import { getServerConfig, assertAsaasConfigured } from "../config.server";
 import { getOfferByKey, mapAgreementOptionKey } from "../domain/negotiation";
 import { isValidDocument, normalizeDocument } from "../domain/document";
 import { createAsaasPayment, ensureAsaasCustomer } from "./asaas.server";
@@ -17,7 +17,18 @@ export async function lookupNegotiations(document: string) {
     throw new Error("Informe um CPF ou CNPJ válido.");
   }
 
-  const negotiations = await findNegotiationsByDocument(normalized);
+  let negotiations;
+  try {
+    negotiations = await findNegotiationsByDocument(normalized);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erro desconhecido";
+    if (/Missing required environment variable/i.test(message)) {
+      throw new Error(
+        "O backend ainda não está configurado para consultar a base. Verifique as credenciais do Supabase.",
+      );
+    }
+    throw new Error("Não conseguimos consultar suas ofertas agora. Tente novamente em instantes.");
+  }
 
   await createIntegrationLog({
     origin: "negociacao_busca",
@@ -56,6 +67,8 @@ export async function formalizeAgreement(input: {
   if (!offer) {
     throw new Error("A proposta selecionada não está disponível.");
   }
+
+  assertAsaasConfigured();
 
   const agreementRow = await createAgreement({
     negotiationId: negotiation.id,
