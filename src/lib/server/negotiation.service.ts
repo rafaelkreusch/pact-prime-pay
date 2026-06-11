@@ -1,4 +1,5 @@
-import { getServerConfig } from "../config.server";
+import { getServerConfig, assertAsaasConfigured } from "../config.server";
+import { getRequestHost, getRequestHeader } from "@tanstack/react-start/server";
 import { getOfferByKey, mapAgreementOptionKey } from "../domain/negotiation";
 import { isValidDocument, normalizeDocument } from "../domain/document";
 import { createAsaasPayment, ensureAsaasCustomer } from "./asaas.server";
@@ -17,7 +18,18 @@ export async function lookupNegotiations(document: string) {
     throw new Error("Informe um CPF ou CNPJ válido.");
   }
 
-  const negotiations = await findNegotiationsByDocument(normalized);
+  let negotiations;
+  try {
+    negotiations = await findNegotiationsByDocument(normalized);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erro desconhecido";
+    if (/Missing required environment variable/i.test(message)) {
+      throw new Error(
+        "O backend ainda não está configurado para consultar a base. Verifique as credenciais do Supabase.",
+      );
+    }
+    throw new Error("Não conseguimos consultar suas ofertas agora. Tente novamente em instantes.");
+  }
 
   await createIntegrationLog({
     origin: "negociacao_busca",
@@ -57,6 +69,8 @@ export async function formalizeAgreement(input: {
     throw new Error("A proposta selecionada não está disponível.");
   }
 
+  assertAsaasConfigured();
+
   const agreementRow = await createAgreement({
     negotiationId: negotiation.id,
     debtorName: negotiation.debtorName,
@@ -71,6 +85,7 @@ export async function formalizeAgreement(input: {
 
   const agreementId = String(agreementRow.id);
   const config = getServerConfig();
+  const appUrl = resolveAppUrlFromRequest() ?? config.appUrl;
 
   try {
     const customer = await ensureAsaasCustomer({
@@ -98,7 +113,7 @@ export async function formalizeAgreement(input: {
       installmentCount: offer.installmentCount,
       installmentValue: offer.installmentValue,
       totalValue: offer.totalValue,
-      callbackSuccessUrl: `${config.appUrl}/sucesso?agreementId=${agreementId}`,
+      callbackSuccessUrl: `${appUrl}/sucesso?agreementId=${agreementId}`,
     });
 
     const updatedAgreement = await updateAgreement(agreementId, {
@@ -158,4 +173,15 @@ export async function getAgreementDetails(agreementId: string) {
   }
 
   return agreement;
+}
+
+function resolveAppUrlFromRequest(): string | null {
+  try {
+    const host = getRequestHost();
+    if (!host) return null;
+    const proto = getRequestHeader("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  } catch {
+    return null;
+  }
 }

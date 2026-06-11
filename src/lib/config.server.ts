@@ -24,13 +24,12 @@ type AppConfig = {
   };
 };
 
-function getRequiredEnv(name: string) {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+function getRequiredEnv(name: string, ...alternates: string[]) {
+  for (const key of [name, ...alternates]) {
+    const value = process.env[key];
+    if (value) return value;
   }
-
-  return value;
+  throw new Error(`Missing required environment variable: ${name}`);
 }
 
 function getOptionalEnv(name: string, fallback: string) {
@@ -49,14 +48,28 @@ function getPositiveIntegerEnv(name: string, fallback: number) {
   return parsed;
 }
 
+function resolveAppUrl(): string {
+  const fromEnv =
+    process.env.APP_URL ??
+    process.env.VITE_APP_URL ??
+    process.env.PUBLIC_APP_URL ??
+    process.env.URL ??
+    process.env.DEPLOY_URL;
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  return "http://localhost:3000";
+}
+
 export function getServerConfig(): AppConfig {
   return {
     nodeEnv: process.env.NODE_ENV ?? "development",
-    appUrl: getRequiredEnv("APP_URL"),
+    appUrl: resolveAppUrl(),
     paymentDueDays: getPositiveIntegerEnv("PAYMENT_DUE_DAYS", 3),
     supabase: {
-      url: getRequiredEnv("SUPABASE_URL"),
-      serviceRoleKey: getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
+      url: getRequiredEnv("SUPABASE_URL", "VITE_SUPABASE_URL"),
+      serviceRoleKey: getRequiredEnv(
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_SERVICE_KEY",
+      ),
       negotiationsTable: getOptionalEnv("SUPABASE_NEGOTIATIONS_TABLE", "negociacoes"),
       agreementsTable: getOptionalEnv("SUPABASE_AGREEMENTS_TABLE", "acordos"),
       logsTable: getOptionalEnv("SUPABASE_LOGS_TABLE", "logs_integracao"),
@@ -69,8 +82,16 @@ export function getServerConfig(): AppConfig {
       installment4xColumn: getOptionalEnv("SUPABASE_INSTALLMENT_4X_COLUMN", "parcela_4x"),
     },
     asaas: {
-      apiKey: getRequiredEnv("ASAAS_API_KEY"),
+      apiKey: getOptionalEnv("ASAAS_API_KEY", ""),
       baseUrl: getOptionalEnv("ASAAS_BASE_URL", "https://api-sandbox.asaas.com/v3"),
     },
   };
+}
+
+export function assertAsaasConfigured(): void {
+  if (!process.env.ASAAS_API_KEY) {
+    throw new Error(
+      "A integração com o Asaas ainda não foi configurada. Defina ASAAS_API_KEY para gerar cobranças.",
+    );
+  }
 }
