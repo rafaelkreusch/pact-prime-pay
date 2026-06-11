@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Building2, CreditCard, LoaderCircle, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Building2, Clock, CreditCard, LoaderCircle, ShieldCheck } from "lucide-react";
 
 import { generateAgreementPayment, searchNegotiations } from "@/lib/api/negotiation.functions";
 import { formatCurrency } from "@/lib/domain/currency";
@@ -33,6 +33,17 @@ function NegotiationPage() {
   const { document } = Route.useSearch();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(15 * 60);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return;
+    const id = setInterval(() => setSecondsLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, [secondsLeft]);
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+  const offerExpired = secondsLeft <= 0;
 
   const negotiationsQuery = useQuery({
     queryKey: ["negotiations", document],
@@ -112,7 +123,25 @@ function NegotiationPage() {
             </div>
             <div className="flex items-center gap-2 text-xs text-neutral-500">
               <ShieldCheck className="w-4 h-4 text-green-600" />
-              Consulta segura com dados vindos do Supabase
+              Pagamento 100% seguro e criptografado
+            </div>
+          </div>
+          <div className={`mt-4 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 ${offerExpired ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}`}>
+            <div className="flex items-center gap-2">
+              <Clock className={`w-4 h-4 ${offerExpired ? "text-red-600" : "text-amber-600"}`} />
+              <div>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${offerExpired ? "text-red-700" : "text-amber-700"}`}>
+                  {offerExpired ? "Oferta expirada" : "Oferta exclusiva por tempo limitado"}
+                </p>
+                <p className={`text-xs ${offerExpired ? "text-red-600" : "text-amber-700/80"}`}>
+                  {offerExpired
+                    ? "Recarregue a página para tentar uma nova negociação."
+                    : "Aproveite essas condições antes que expirem."}
+                </p>
+              </div>
+            </div>
+            <div className={`font-mono text-2xl font-bold tabular-nums ${offerExpired ? "text-red-600" : "text-amber-700"}`}>
+              {mm}:{ss}
             </div>
           </div>
         </section>
@@ -245,7 +274,7 @@ function NegotiationPage() {
             <button
               type="button"
               onClick={handleCreatePayment}
-              disabled={!selectedOffer || !acceptedTerms || isSubmitting}
+              disabled={!selectedOffer || !acceptedTerms || isSubmitting || offerExpired}
               className="w-full flex items-center justify-center gap-2 rounded-xl py-4 text-sm font-semibold transition-all bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
