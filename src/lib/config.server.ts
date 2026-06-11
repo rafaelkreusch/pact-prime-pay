@@ -65,9 +65,14 @@ export function getServerConfig(): AppConfig {
     appUrl: resolveAppUrl(),
     paymentDueDays: getPositiveIntegerEnv("PAYMENT_DUE_DAYS", 3),
     supabase: {
-      url: getRequiredEnv("SUPABASE_URL", "VITE_SUPABASE_URL"),
+      url: getRequiredEnv(
+        "SUPABASE_URL",
+        "PROJECT_SUPABASE_URL",
+        "VITE_SUPABASE_URL",
+      ),
       serviceRoleKey: getRequiredEnv(
         "SUPABASE_SERVICE_ROLE_KEY",
+        "PROJECT_SUPABASE_SERVICE_ROLE_KEY",
         "SUPABASE_SERVICE_KEY",
       ),
       negotiationsTable: getOptionalEnv("SUPABASE_NEGOTIATIONS_TABLE", "negociacoes"),
