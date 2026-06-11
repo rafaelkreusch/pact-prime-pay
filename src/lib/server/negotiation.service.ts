@@ -1,4 +1,5 @@
 import { getServerConfig, assertAsaasConfigured } from "../config.server";
+import { getRequestHost, getRequestHeader } from "@tanstack/react-start/server";
 import { getOfferByKey, mapAgreementOptionKey } from "../domain/negotiation";
 import { isValidDocument, normalizeDocument } from "../domain/document";
 import { createAsaasPayment, ensureAsaasCustomer } from "./asaas.server";
@@ -84,6 +85,7 @@ export async function formalizeAgreement(input: {
 
   const agreementId = String(agreementRow.id);
   const config = getServerConfig();
+  const appUrl = resolveAppUrlFromRequest() ?? config.appUrl;
 
   try {
     const customer = await ensureAsaasCustomer({
@@ -111,7 +113,7 @@ export async function formalizeAgreement(input: {
       installmentCount: offer.installmentCount,
       installmentValue: offer.installmentValue,
       totalValue: offer.totalValue,
-      callbackSuccessUrl: `${config.appUrl}/sucesso?agreementId=${agreementId}`,
+      callbackSuccessUrl: `${appUrl}/sucesso?agreementId=${agreementId}`,
     });
 
     const updatedAgreement = await updateAgreement(agreementId, {
@@ -171,4 +173,15 @@ export async function getAgreementDetails(agreementId: string) {
   }
 
   return agreement;
+}
+
+function resolveAppUrlFromRequest(): string | null {
+  try {
+    const host = getRequestHost();
+    if (!host) return null;
+    const proto = getRequestHeader("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  } catch {
+    return null;
+  }
 }
