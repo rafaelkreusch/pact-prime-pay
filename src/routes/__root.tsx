@@ -81,10 +81,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Plataforma de negociação digital com Supabase e geração de cobrança pelo Asaas." },
       { name: "author", content: "Devalor Cobranças" },
       { property: "og:title", content: "Devalor Cobranças" },
-      { property: "og:description", content: "Negociação de dívidas com geração automática de cobrança." },
+      { property: "og:description", content: "Plataforma de negociação digital com Supabase e geração de cobrança pelo Asaas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Devalor Cobranças" },
+      { name: "twitter:description", content: "Plataforma de negociação digital com Supabase e geração de cobrança pelo Asaas." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9c247bac-4c19-491a-8c2e-416721ff437a/id-preview-e719fe76--28464ee2-1388-4883-b22e-fc69d5882917.lovable.app-1781189048174.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9c247bac-4c19-491a-8c2e-416721ff437a/id-preview-e719fe76--28464ee2-1388-4883-b22e-fc69d5882917.lovable.app-1781189048174.png" },
     ],
     links: [
       {
