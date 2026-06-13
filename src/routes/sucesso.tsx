@@ -45,7 +45,7 @@ function SuccessPage() {
         <div className="space-y-2">
           <h1 className="text-xl font-bold text-neutral-900">Cobrança gerada</h1>
           <p className="text-sm text-neutral-500">
-            O acordo foi registrado no sistema e a cobrança já está pronta para pagamento no Asaas.
+            O acordo foi registrado no sistema e a cobrança já está pronta para pagamento de forma segura.
           </p>
         </div>
 
@@ -74,7 +74,7 @@ function SuccessPage() {
           <>
             <div className="bg-green-50 rounded-lg p-4 text-left space-y-3">
               <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Resumo do acordo</p>
-              <SummaryRow label="Devedor" value={agreement.debtorName} />
+              <SummaryRow label="Cliente" value={agreement.debtorName} />
               <SummaryRow label="Credor" value={agreement.creditor} />
               <SummaryRow label="Forma" value={agreement.installmentCount === 1 ? "À vista" : `${agreement.installmentCount}x`} />
               <SummaryRow label="Total" value={formatCurrency(agreement.totalValue)} />
@@ -89,14 +89,14 @@ function SuccessPage() {
                 rel="noreferrer"
                 className="inline-flex w-full items-center justify-center gap-2 bg-neutral-900 text-white text-sm font-semibold rounded-xl py-3.5 hover:bg-neutral-800 transition-colors"
               >
-                Abrir cobrança no Asaas
+                Visualizar cobrança
                 <ExternalLink className="w-4 h-4" />
               </a>
             )}
 
             {!agreement.invoiceUrl && (
               <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                A cobrança foi registrada, mas o Asaas não retornou um link de fatura.
+                A cobrança foi registrada, mas não foi gerado um link de fatura.
               </div>
             )}
           </>
