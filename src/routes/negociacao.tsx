@@ -214,8 +214,16 @@ function NegotiationPage() {
                               {offer.badge}
                             </span>
                           </div>
-                          <p className="text-lg font-bold text-neutral-900">{formatCurrency(offer.totalValue)}</p>
-                          <p className="text-xs text-neutral-500">{offer.description}</p>
+                          <p className="text-lg font-bold text-neutral-900">
+                            {offer.installmentCount > 1
+                              ? `${offer.installmentCount}x de ${formatCurrency(offer.installmentValue)}`
+                              : formatCurrency(offer.totalValue)}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            {offer.installmentCount > 1
+                              ? `Total ${formatCurrency(offer.totalValue)}`
+                              : offer.description}
+                          </p>
                         </div>
                         <div
                           className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
