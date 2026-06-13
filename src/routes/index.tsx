@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShieldCheck, Lock, ArrowRight, Search, CheckCircle2, Clock, BadgePercent } from "lucide-react";
 
-import logoAsset from "@/assets/devalor-logo.png.asset.json";
+import logoAsset from "@/assets/devalor-logo-white.png.asset.json";
 import { getDocumentType, isValidDocument, maskDocument, normalizeDocument } from "@/lib/domain/document";
 
 export const Route = createFileRoute("/")({
