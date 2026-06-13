@@ -21,7 +21,7 @@ export const Route = createFileRoute("/negociacao")({
       { title: "Negociação - Devalor Cobranças" },
       {
         name: "description",
-        content: "Escolha a proposta disponível e gere sua cobrança automaticamente pelo Asaas.",
+        content: "Escolha a proposta disponível e gere sua cobrança de forma rápida e segura.",
       },
     ],
   }),
@@ -168,7 +168,7 @@ function NegotiationPage() {
           <section className="bg-white rounded-2xl border border-neutral-100 p-8 text-center space-y-3">
             <p className="text-base font-semibold text-neutral-900">Nenhuma proposta encontrada.</p>
             <p className="text-sm text-neutral-500">
-              Verifique o documento informado ou confirme se a oferta já foi cadastrada no Supabase.
+              Verifique o documento informado e tente novamente em instantes.
             </p>
           </section>
         )}
@@ -180,7 +180,7 @@ function NegotiationPage() {
             <section key={negotiation.id} className="bg-white rounded-2xl border border-neutral-100 p-5 space-y-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Devedor</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Cliente</p>
                   <p className="text-base font-bold text-neutral-900">{negotiation.debtorName}</p>
                   <p className="text-sm text-neutral-500">{maskDocument(negotiation.document)}</p>
                 </div>
@@ -238,7 +238,7 @@ function NegotiationPage() {
             <div className="space-y-2">
               <p className="text-sm font-semibold text-neutral-900">Confirmação do acordo</p>
               <p className="text-sm text-neutral-500">
-                Ao confirmar, o sistema registra o acordo no Supabase e cria a cobrança automaticamente no Asaas.
+                Ao confirmar, geramos sua cobrança e você será direcionado para o pagamento seguro.
               </p>
             </div>
 
