@@ -292,6 +292,10 @@ function NegotiationPage() {
           </section>
         )}
       </main>
+
+      <footer className="text-center py-6 text-neutral-400 text-[11px]">
+        <p>© {new Date().getFullYear()} Devalor Cobranças Ltda · CNPJ 15.724.288/0001-14 · Todos os direitos reservados</p>
+      </footer>
     </div>
   );
 }

@@ -87,7 +87,7 @@ function IdentificationPage() {
             </h1>
             <p className="text-white/80 text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
               Informe seu CPF ou CNPJ para localizar as condições cadastradas no sistema
-              e seguir direto para a cobrança no Asaas.
+              e seguir direto para a cobrança de forma segura.
             </p>
 
             <ul className="grid sm:grid-cols-3 gap-3 pt-2 max-w-xl mx-auto lg:mx-0">
@@ -115,7 +115,7 @@ function IdentificationPage() {
                 Comece agora
               </p>
               <h2 className="font-display text-2xl font-bold text-foreground leading-tight">Consultar ofertas</h2>
-              <p className="text-sm text-muted-foreground">Localizamos seus dados direto na base do Supabase.</p>
+              <p className="text-sm text-muted-foreground">Localizamos seus dados direto na base de dados.</p>
             </div>
 
             <div className="space-y-2">
@@ -184,8 +184,8 @@ function IdentificationPage() {
         </div>
       </main>
 
-      <footer className="relative z-10 text-center pb-6 text-white/45 text-[11px]">
-        © {new Date().getFullYear()} Devalor Cobranças · Todos os direitos reservados
+      <footer className="relative z-10 text-center pb-6 text-white/45 text-[11px] space-y-1">
+        <p>© {new Date().getFullYear()} Devalor Cobranças Ltda · CNPJ 15.724.288/0001-14 · Todos os direitos reservados</p>
       </footer>
     </div>
   );
